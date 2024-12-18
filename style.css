@@ -1,0 +1,227 @@
+/* General Styles */
+body {
+  font-family: "Open Sans", sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  background: url("subtle-texture.png");
+  background-size: cover;
+  line-height: 1.6;
+}
+
+header {
+  background: linear-gradient(to right, #007bff, #0056b3);
+  color: white;
+  padding: 3rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+  font-family: "Poppins", sans-serif;
+  font-size: 3.5rem;
+  margin: 0;
+  font-weight: 700;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+header p {
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+section {
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
+
+.section-title {
+  color: #0056b3;
+  font-family: "Poppins", sans-serif;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 3px solid #007bff;
+  display: inline-block;
+  animation: bounceIn 0.8s ease-in-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-icon {
+  font-size: 2rem;
+  color: #007bff;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: block;
+}
+
+.card .tagline {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #0056b3;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.card .details {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.8;
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.4s ease;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Card Expansion Styles */
+.card.expanded {
+  position: fixed;
+  left: 50%;
+  bottom: 0; /* Start offscreen at bottom */
+  transform: translateX(-50%) translateY(100%); /* Move card below bottom edge initially */
+  width: 90%;
+  max-width: 900px;
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: 75%; /* Adjust as needed */
+  transition: transform 0.4s ease;
+}
+  
+.card.expanded .details {
+  max-height: 500px; /* Adjust as needed */
+  opacity: 1;
+}
+  
+.card.expanding {
+  transform: translateX(-50%) translateY(0%); /* Move to middle of screen */
+  transition: transform 0.4s ease;
+}
+  
+.card.expanded .card-icon {
+  margin-top: 1rem;
+  font-size: 2.5rem;
+  color: #007bff;
+}
+  
+.card.expanded .tagline {
+  font-size: 1.8rem;
+  margin-top: 0.5rem;
+}
+  
+/* Close Button */
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  display: none; /* Initially hidden */
+  align-items: center; /* Center the '×' */
+  justify-content: center;
+  z-index: 1001; /* Ensure it's above the expanded card */
+}
+
+.card.expanded .close-button {
+  opacity: 1;
+  display: flex; /* Show the button when expanded */
+}
+
+.close-button:hover {
+  background-color: #c82333;
+  transform: scale(1.1);
+}
+  
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 3rem;
+    background: linear-gradient(to right, #007bff, #0056b3);
+    color: white;
+}
+  
+  /* Overlay */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    transition: opacity 0.3s ease;
+  }
+  
+.overlay.active {
+    display: block;
+}
+  
+/* Responsive Design */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2.5rem;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .card.expanded {
+    width: 95%;
+  }
+}
