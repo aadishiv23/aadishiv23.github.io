@@ -1,8 +1,30 @@
 const cards = document.querySelectorAll('.card');
 const overlay = document.getElementById('overlay');
 let isAnimating = false;
+const header = document.querySelector('header');
+
+// Function to handle header shrink on scroll
+function handleScroll() {
+    if (window.scrollY > 100) { // Adjust the scroll threshold as needed
+        header.classList.add('shrink');
+    } else {
+        header.classList.remove('shrink');
+    }
+}
+
+// Attach the scroll event listener
+window.addEventListener('scroll', handleScroll);
 
 cards.forEach(card => {
+    // Prevent the click on "Learn More" button from triggering the card click event
+    const button = card.querySelector('.card-button');
+    if (button) {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent the card's click event
+            // The link will navigate as usual
+        });
+    }
+
     card.addEventListener('click', () => {
         if (isAnimating) return;
 
@@ -42,7 +64,7 @@ function openExpandedCard(card) {
     // Add close button to the cloned card
     const closeButton = document.createElement('button');
     closeButton.classList.add('close-button');
-    closeButton.textContent = "×";
+    closeButton.innerHTML = "&times;";
     closeButton.setAttribute('aria-label', 'Close');
     closeButton.setAttribute('title', 'Close');
 
@@ -54,6 +76,15 @@ function openExpandedCard(card) {
 
     clonedCard.appendChild(closeButton);
     document.body.appendChild(clonedCard);
+
+    // Prevent "Learn More" button in cloned card from triggering expansion
+    const clonedButton = clonedCard.querySelector('.card-button');
+    if (clonedButton) {
+        clonedButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent the card's click event
+            // The link will navigate as usual
+        });
+    }
 
     // Force reflow to apply initial styles before adding the expanding class
     requestAnimationFrame(() => {
