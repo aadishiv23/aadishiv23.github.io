@@ -30,14 +30,15 @@ export default function Hero() {
   return (
     <section
       ref={heroRef}
-      className="h-screen relative flex items-center justify-center text-center overflow-hidden"
+      className="h-screen relative flex items-center justify-center text-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800"
     >
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/30 to-dark opacity-70" />
+      {/* Background Overlay */}
+      <div className="absolute inset-0 bg-gray-900/60" />
 
-      <div ref={textRef} className="container mx-auto px-4 relative z-10">
+      {/* Hero Content */}
+      <div ref={textRef} className="container mx-auto px-6 relative z-10">
         <motion.h1
-          className="text-7xl md:text-9xl font-bold gradient-text mb-6"
+          className="text-6xl md:text-8xl font-bold text-white mb-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
@@ -46,7 +47,7 @@ export default function Hero() {
         </motion.h1>
 
         <motion.p
-          className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto"
+          className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
@@ -56,49 +57,17 @@ export default function Hero() {
 
         {/* Call-to-action buttons */}
         <motion.div
-          className="mt-12 flex flex-col md:flex-row items-center justify-center gap-4"
+          className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
         >
           <a
             href="#projects"
-            className="px-8 py-4 bg-primary hover:bg-primary/80 rounded-full font-medium transition-colors duration-300"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-all"
           >
             View My Work
           </a>
-
-          {/* Projects Dropdown */}
-          <div className="relative group">
-            <a
-              href="/projects"
-              className="px-8 py-4 bg-secondary hover:bg-secondary/80 rounded-full font-medium transition-colors duration-300"
-            >
-              Projects
-            </a>
-            <div className="absolute hidden group-hover:block bg-dark mt-2 w-48 rounded-lg shadow-lg z-50">
-              <ul>
-                {projectsData.map((project) => (
-                  <li key={project.id}>
-                    <a
-                      href={`/projects/${project.id}`}
-                      className="block px-4 py-2 hover:bg-gray-700 text-white"
-                    >
-                      {project.title}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <div className="border-t border-gray-700 mt-2">
-                <a
-                  href="/projects"
-                  className="block px-4 py-2 text-center font-bold hover:bg-gray-700 text-white"
-                >
-                  View All Projects
-                </a>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>
