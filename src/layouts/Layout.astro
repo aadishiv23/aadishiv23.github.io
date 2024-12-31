@@ -1,0 +1,43 @@
+---
+import '../styles/globals.css';
+import Navigation from '../components/Navigation';
+import Footer from '../components/Footer';
+
+const { title = 'Aadi Shiv Malhotra - Portfolio' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Aadi Shiv Malhotra - Software Engineer & Innovator" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Navigation client:load />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+        import Lenis from '@studio-freight/lenis';
+
+        const lenis = new Lenis({
+            duration: 1.5, // Smoothness duration
+            easing: (t) => 1 - Math.pow(1 - t, 3), // Cubic easing
+            smoothTouch: true,
+            touchMultiplier: 1.5,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+    </script>
+
+  </body>
+</html>

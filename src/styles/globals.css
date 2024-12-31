@@ -1,0 +1,33 @@
+/* src/styles/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: auto; /* Prevent default scroll-behavior conflicting with Lenis */
+  overflow-x: hidden;
+  background: #000;
+  color: #fff;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:scale-105;
+}
+
+.section-padding {
+  @apply py-20 md:py-32;
+}
