@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import ScrollTrigger from 'gsap/dist/ScrollTrigger'; // Use the dist version for SSR compatibility
+
+gsap.registerPlugin(ScrollTrigger);
 import { motion } from 'framer-motion';
 
 export default function Projects() {
