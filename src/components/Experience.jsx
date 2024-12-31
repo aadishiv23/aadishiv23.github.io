@@ -3,16 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Experience() {
   const [selectedExperience, setSelectedExperience] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedMedia, setExpandedMedia] = useState(null);
 
   const openModal = (experience) => {
     setSelectedExperience(experience);
-    setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
     setSelectedExperience(null);
+    setExpandedMedia(null);
+  };
+
+  const expandMedia = (media) => {
+    setExpandedMedia(media);
   };
 
   const experiences = [
@@ -20,9 +23,7 @@ export default function Experience() {
       company: 'Apple',
       role: 'Software Engineering Intern',
       period: 'May 2025 - Aug 2025',
-      highlights: [
-        'Incoming Software Engineering Intern at Shortcuts & App Intents Engineering team.',
-      ],
+      highlights: ['Incoming Software Engineering Intern at Shortcuts & App Intents Engineering team.'],
       media: [],
     },
     {
@@ -36,10 +37,10 @@ export default function Experience() {
         'Created FetchAR during company-wide hackathon, winning People Choice award',
       ],
       media: [
-        '/images/fetch/fetch_web_1.PNG',
-        '/images/fetch/fetch_web_2.PNG',
-        '/images/fetch/fetch_web_3.PNG',
-        '/images/fetch/fetch_web_4.PNG',
+        { type: 'image', src: '/images/fetch/fetch_web_1.PNG', orientation: 'vertical', shortCaption: 'Fetch Home Screen', longCaption: 'This is the home screen of Fetch app, showcasing trending offers and products.' },
+        { type: 'image', src: '/images/fetch/fetch_web_2.PNG', orientation: 'vertical', shortCaption: 'Search Results', longCaption: 'Search results in the Fetch app displaying various products and services.' },
+        { type: 'image', src: '/images/fetch/fetch_web_3.PNG', orientation: 'vertical', shortCaption: 'Fetch Search Feature', longCaption: 'The Fetch search feature allowing users to find relevant results quickly.' },
+        { type: 'image', src: '/images/fetch/fetch_web_4.PNG', orientation: 'vertical', shortCaption: 'Fetch Shortcuts Integration', longCaption: 'Integration with iOS Shortcuts for quicker app actions.' },
       ],
     },
     {
@@ -52,20 +53,11 @@ export default function Experience() {
       ],
       media: [],
     },
-    {
-      company: 'Ljungman Lab',
-      role: 'Research Assistant',
-      period: 'Oct 2021 - Present',
-      highlights: [
-        'Working on computational side.',
-        'Built a web platform for rapid RNA design iteration using React and Go.',
-      ],
-      media: [],
-    },
   ];
 
   return (
     <section id="experience" className="py-20 bg-dark text-white">
+      {/* Experience Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -84,7 +76,7 @@ export default function Experience() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="p-6 bg-white/10 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+              className="p-6 bg-white/10 rounded-lg shadow-lg cursor-pointer hover:bg-white/20 hover:brightness-125 transition-all duration-300"
               onClick={() => openModal(exp)}
             >
               <h3 className="text-2xl font-bold">{exp.company}</h3>
@@ -102,48 +94,73 @@ export default function Experience() {
 
       {/* Modal */}
       <AnimatePresence>
-        {isModalOpen && selectedExperience && (
+        {selectedExperience && (
           <motion.div
-            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 overflow-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="relative bg-dark rounded-lg shadow-xl max-w-4xl w-full p-6">
+            <div className="relative max-w-5xl w-full bg-dark rounded-lg shadow-lg overflow-hidden">
+              {/* Close Button */}
               <button
                 onClick={closeModal}
                 className="absolute top-4 right-4 text-white text-3xl z-10"
               >
                 ✕
               </button>
-              <h3 className="text-3xl font-bold text-white mb-2">
-                {selectedExperience.company}
-              </h3>
-              <p className="text-lg text-primary mb-4">{selectedExperience.role}</p>
-              <p className="text-sm text-white/70 mb-4">{selectedExperience.period}</p>
-              <ul className="list-disc list-inside text-white/80 space-y-2 mb-6">
-                {selectedExperience.highlights.map((point, idx) => (
-                  <li key={idx}>{point}</li>
-                ))}
-              </ul>
 
-              {/* Media Carousel */}
+              {/* Experience Details */}
+              <div className="p-6 text-white">
+                <h3 className="text-3xl font-bold">{selectedExperience.company}</h3>
+                <p className="text-lg text-primary">{selectedExperience.role}</p>
+                <p className="text-sm text-white/70 mb-4">{selectedExperience.period}</p>
+                <ul className="list-disc list-inside text-white/80 space-y-2">
+                  {selectedExperience.highlights.map((point, idx) => (
+                    <li key={idx}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Media Display */}
               {selectedExperience.media.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-black/30 rounded-lg mt-4 flex gap-4 overflow-x-auto no-scrollbar">
                   {selectedExperience.media.map((media, idx) => (
-                    <motion.img
+                    <div
                       key={idx}
-                      src={media}
-                      alt={`Media ${idx + 1}`}
-                      className="w-full h-48 object-cover rounded-lg"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.2 }}
-                    />
+                      onClick={() => expandMedia(media)}
+                      className="relative min-w-[200px] max-w-[300px] h-[500px] rounded-lg overflow-hidden cursor-pointer group"
+                    >
+                      <img src={media.src} alt={media.shortCaption} className="object-cover w-full h-full" />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                        <p className="text-white text-sm">{media.shortCaption}</p>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
+
+            {/* Expanded Media */}
+            {expandedMedia && (
+              <motion.div
+                className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+                onClick={() => setExpandedMedia(null)}
+              >
+                <div className={`relative flex ${expandedMedia.orientation === 'vertical' ? 'flex-row' : 'flex-col'} gap-6 items-center`}>
+                  <img src={expandedMedia.src} alt="Expanded Media" className="object-contain max-w-[70%] max-h-[90vh]" />
+                  <div className={`text-white text-lg ${expandedMedia.orientation === 'vertical' ? 'self-center' : 'text-center'}`}>
+                    {expandedMedia.longCaption}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setExpandedMedia(null)}
+                  className="absolute top-4 right-4 text-white text-3xl"
+                >
+                  ✕
+                </button>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

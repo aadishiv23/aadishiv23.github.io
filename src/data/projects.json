@@ -1,0 +1,23 @@
+[
+    {
+      "id": "radius",
+      "title": "Radius",
+      "description": "Real-time location tracking with AR capabilities",
+      "media": {
+        "type": "video",
+        "src": "/videos/Radius_beta.mp4"
+      },
+      "tech": ["Swift", "ARKit", "CoreLocation"]
+    },
+    {
+      "id": "macboard",
+      "title": "macBoard",
+      "description": "SwiftUI-based macOS clipboard manager",
+      "media": {
+        "type": "image",
+        "src": "/images/macboard_img.png"
+      },
+      "tech": ["Swift", "SwiftUI", "AppKit"]
+    }
+  ]
+  
