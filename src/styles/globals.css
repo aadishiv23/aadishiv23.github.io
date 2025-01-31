@@ -3,42 +3,31 @@
 =========================== */
 :root {
   /* Light Mode */
-  --bg-light: #f9fafb; /* Light mode background */
-  --text-light: #111827; /* Light mode text */
-  --card-bg-light: #ffffff; /* Light mode card background */
-  --card-hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  --bg-light: #f5f7fa; /* slightly brighter background */
+  --text-light: #222;
+  --card-bg-light: #ffffff;
+  --card-hover-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 
   /* Dark Mode */
-  --bg-dark: #1e293b; /* Dark mode background */
-  --text-dark: #f9fafb; /* Dark mode text */
-  --card-bg-dark: #334155; /* Dark mode card background */
+  --bg-dark: #1f2937;
+  --text-dark: #f1f5f9;
+  --card-bg-dark: #2d3748;
 
-  /* Modal */
-  --modal-bg: rgba(0, 0, 0, 0.85); /* Dark background overlay */
-  --modal-box-bg: #e2e8f0; /* Grayish-bluish modal box background */
-  --modal-text: #1e293b; /* Modal text color */
-  --modal-overlay: rgba(0, 0, 0, 0.6);
+  /* Modal & Glassmorphism */
+  --modal-bg: rgba(0, 0, 0, 0.5);
+  --modal-box-bg: rgba(255, 255, 255, 0.75);
+  --modal-text: #1f2937;
+  --modal-overlay: rgba(0, 0, 0, 0.4);
+  --backdrop-blur: blur(10px);
 
   /* Gradient Colors */
-  --gradient-start: #00b4d8; /* Blue */
-  --gradient-end: #f77f00; /* Orange */
-}
-
-/* Apply Theme */
-body {
-  transition: background-color 0.3s, color 0.3s;
-  background-color: var(--bg-light);
-  color: var(--text-light);
-}
-
-body.dark {
-  background-color: var(--bg-dark);
-  color: var(--text-dark);
+  --gradient-start: #00b4d8;
+  --gradient-end: #f77f00;
 }
 
 /* ==========================
-       📚 GENERAL STYLES
-  ========================== */
+       Global Styles
+=========================== */
 html {
   scroll-behavior: smooth;
 }
@@ -47,33 +36,33 @@ body {
   font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s, color 0.3s;
   overflow-x: hidden;
 }
 
+body.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
+/* Section Padding */
 .section-padding {
   padding: 5rem 0;
 }
 
-.text-primary {
-  color: var(--gradient-start);
-}
-
-.text-secondary {
-  color: var(--gradient-end);
-}
-
-/* ==========================
-       🎨 GRADIENT TEXT
-  =========================== */
+/* Gradient Text */
 .gradient-text {
   background: linear-gradient(
-    to right,
+    135deg,
     var(--gradient-start),
     var(--gradient-end)
   );
@@ -81,9 +70,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* ==========================
-       🃏 CARD STYLING
-  =========================== */
+/* Cards */
 .card {
   background-color: var(--card-bg-light);
   border-radius: 0.75rem;
@@ -91,146 +78,30 @@ body {
   box-shadow: var(--card-hover-shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 body.dark .card {
   background-color: var(--card-bg-dark);
 }
-
 .card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  transform: scale(1.03);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
-/* ==========================
-       📸 MEDIA GRID
-  =========================== */
-.media-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.media-grid-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.media-grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.media-item {
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.5rem;
-  transition: transform 0.3s ease;
-}
-
-.media-item img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.media-item:hover {
-  transform: scale(1.05);
-}
-
-.media-item .caption {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: var(--modal-overlay);
-  color: #fff;
-  font-size: 0.9rem;
-  padding: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.media-item:hover .caption {
-  opacity: 1;
-}
-
-/* ==========================
-       🖥️ MODAL STYLES
-  =========================== */
-/* Modal Background Overlay */
-.bg-modalBackground {
-  background: var(--modal-bg);
-}
-
-/* Modal Box */
+/* Modal (Glassmorphism style) */
 .modal {
   background-color: var(--modal-box-bg);
   color: var(--modal-text);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  max-width: 90%;
-  max-height: 90%;
-  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  backdrop-filter: var(--backdrop-blur);
   animation: modalFadeIn 0.3s ease-in-out;
 }
-
-/* Dark Mode Modal */
-body.dark .modal {
-  background-color: var(--card-bg-dark);
-  color: var(--text-dark);
-}
-
-/* Modal Animation */
 @keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Modal Close Button */
-.modal-close-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 1.5rem;
-  color: var(--modal-text);
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-body.dark .modal-close-btn {
-  color: var(--text-dark);
-}
-
-.modal-close-btn:hover {
-  color: var(--gradient-end);
-}
-
-/* Modal Media Section */
-.modal-media {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding: 1rem;
-  background: var(--modal-overlay);
-  border-radius: 0.5rem;
-}
-
-.modal-media img {
-  border-radius: 0.5rem;
-  transition: transform 0.3s ease;
-}
-
-.modal-media img:hover {
-  transform: scale(1.05);
-}
-
-/* ==========================
-       🖱️ BUTTONS
-  =========================== */
+/* Buttons */
 .button {
   display: inline-flex;
   align-items: center;
@@ -240,36 +111,19 @@ body.dark .modal-close-btn {
   font-weight: 500;
   transition: background-color 0.3s, transform 0.2s;
 }
-
 .button-primary {
   background: var(--gradient-start);
   color: #fff;
 }
-
 .button-primary:hover {
   background: var(--gradient-end);
   transform: translateY(-2px);
 }
 
-/* ==========================
-       📱 RESPONSIVE STYLES
-  =========================== */
+/* Responsive tweaks */
 @media (max-width: 768px) {
-  .section-padding {
-    padding: 3rem 0;
-  }
-
-  .media-grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .section-padding { padding: 3rem 0; }
 }
-
 @media (max-width: 480px) {
-  .section-padding {
-    padding: 2rem 0;
-  }
-
-  .media-grid-4 {
-    grid-template-columns: repeat(1, 1fr);
-  }
+  .section-padding { padding: 2rem 0; }
 }

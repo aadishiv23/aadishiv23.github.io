@@ -1,5 +1,5 @@
+import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
 export default function Hero() {
@@ -15,27 +15,17 @@ export default function Hero() {
         stagger: 0.2,
         ease: 'power4.out',
       });
-    });
-
+    }, heroRef);
     return () => ctx.revert();
   }, []);
-
-  const projectsData = [
-    { id: 'radius', title: 'Radius' },
-    { id: 'macBoard', title: 'macBoard' },
-    { id: 'nebula', title: 'Nebula' },
-    { id: 'fetch', title: 'Fetch' }
-  ];
 
   return (
     <section
       ref={heroRef}
-      className="h-screen relative flex items-center justify-center text-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800"
+      className="h-screen flex items-center justify-center text-center relative overflow-hidden bg-gradient-to-br from-gray-800 via-blue-900 to-gray-800"
     >
-      {/* Background Overlay */}
-      <div className="absolute inset-0 bg-gray-900/60" />
-
-      {/* Hero Content */}
+      {/* A creative overlay */}
+      <div className="absolute inset-0 bg-black opacity-40" />
       <div ref={textRef} className="container mx-auto px-6 relative z-10">
         <motion.h1
           className="text-6xl md:text-8xl font-bold text-white mb-4"
@@ -45,7 +35,6 @@ export default function Hero() {
         >
           Aadi Shiv Malhotra
         </motion.h1>
-
         <motion.p
           className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8"
           initial={{ opacity: 0, y: 20 }}
@@ -54,8 +43,6 @@ export default function Hero() {
         >
           University of Michigan Undergraduate, studying Computer Science & Cognitive Science.
         </motion.p>
-
-        {/* Call-to-action buttons */}
         <motion.div
           className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4"
           initial={{ opacity: 0, y: 20 }}
@@ -65,9 +52,9 @@ export default function Hero() {
           <a
             href="/projects"
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-all"
-            >
+          >
             View My Work
-            </a>
+          </a>
         </motion.div>
       </div>
     </section>

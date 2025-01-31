@@ -15,38 +15,45 @@ export default function Navigation() {
     setTheme(newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
     localStorage.setItem('theme', newTheme);
-  };  
+  };
 
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md"
+      className="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-md"
     >
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
-        {/* Logo */}
-        <a href="#" className="text-3xl font-bold text-gray-900 dark:text-white">
+        {/* Logo / Home Link */}
+        <a href="/" className="text-3xl font-bold text-gray-900 dark:text-white">
           ASM
         </a>
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-6">
           <a
-            href="#projects"
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            href="/"
+            className="relative text-gray-700 dark:text-gray-300 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          >
+            Home
+            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
+          </a>
+          <a
+            href="/projects"
+            className="relative text-gray-700 dark:text-gray-300 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
           >
             Projects
           </a>
           <a
             href="#experience"
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="relative text-gray-700 dark:text-gray-300 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
           >
             Experience
           </a>
           <a
             href="#contact"
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="relative text-gray-700 dark:text-gray-300 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
           >
             Contact
           </a>
@@ -64,7 +71,7 @@ export default function Navigation() {
           )}
         </button>
 
-        {/* Mobile Menu (Hidden for now) */}
+        {/* Mobile Menu Toggle (for future implementation) */}
         <div className="md:hidden">
           <button className="text-gray-700 dark:text-gray-300 text-2xl">
             ☰
