@@ -43,7 +43,7 @@ export default function Experience() {
   ];
 
   return (
-    <section id="experience" className="py-20 bg-background">
+    <section id="experience" className="py-20 bg-white dark:bg-gray-900">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -51,7 +51,7 @@ export default function Experience() {
         viewport={{ once: true }}
         className="container mx-auto px-4"
       >
-        <h2 className="text-4xl md:text-6xl font-bold gradient-text text-center mb-12">
+        <h2 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white text-center mb-12">
           Experience
         </h2>
         
@@ -91,7 +91,7 @@ export default function Experience() {
               setSelectedExperience(null);
               setExpandedImage(null);
             }}
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -99,7 +99,7 @@ export default function Experience() {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
+              className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
             >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-6">
@@ -176,7 +176,7 @@ export default function Experience() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setExpandedImage(null)}
-            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col items-center justify-center p-4"
+            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col items-center justify-center p-4 dark:bg-black/95"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}

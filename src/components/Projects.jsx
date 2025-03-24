@@ -20,7 +20,7 @@ export default function Projects() {
 
   return (
     <section id="projects" className="section-padding">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 mt-5">
         <motion.h2
           className="text-4xl md:text-6xl font-bold gradient-text mb-12 text-center"
           initial={{ opacity: 0, y: 20 }}

@@ -10,11 +10,11 @@ export default function Contact() {
         viewport={{ once: true }}
         className="container mx-auto px-4 text-center"
       >
-        <h2 className="text-4xl md:text-6xl font-bold gradient-text mb-4">Contact</h2>
+        <h2 className="text-4xl md:text-6xl font-bold gradient-text mb-5 mt-5">Contact</h2>
         <p className="text-xl mb-8 text-white/80">
           Feel free to reach out to me anytime.
         </p>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-5">
           <a
             href="mailto:aadishiv@umich.edu"
             className="px-8 py-4 bg-gradient-to-r from-blue-500 to-teal-400 hover:opacity-80 rounded-full font-medium transition-all"

@@ -56,6 +56,29 @@ const ProjectGallery = () => {
         github: 'https://github.com/aadishiv23/macBoard',
       },
     },
+    {
+      id: 'plore',
+      title: 'Plore',
+      description: 'A SwiftUI fitness tracking app that visualizes your walking, running, and cycling routes using HealthKit and MapKit',
+      longDescription:
+        'Plore is a SwiftUI-based fitness tracking app that seamlessly integrates with Apple Health and Apple Watch to visualize your walking, running, and cycling workouts on a beautiful interactive map. It fetches route data from HealthKit, simplifies it for performance, and stores it locally using Core Data for quick access and offline support. Plore emphasizes privacy and speed while using Swift Concurrency for smooth, responsive syncing and rendering.',
+      tech: ['Swift', 'SwiftUI', 'MapKit', 'HealthKit', 'CoreData', 'Swift Concurrency'],
+      image: '/videos/plorerecording.mp4',
+      mediaType: 'mobile',
+      features: [
+        'HealthKit integration for retrieving workout and route data',
+        'Beautiful polyline map visualizations for walking, running, and cycling routes',
+        'Core Data-backed local storage for offline access and persistence',
+        'Custom route filtering and toggles by workout type',
+        'Sync frequency settings with automatic debouncing',
+        'Optimized rendering with dynamic user-location updates',
+        'Swift Concurrency-powered data processing for smooth performance',
+        'Interactive bottom sheet with tabs for routes, shortcuts, exploration, and settings',
+      ],
+      links: {
+        github: 'https://github.com/aadishiv23/Plore',
+      },
+    },
   ];
 
   const getGridMediaClass = (mediaType) => {
@@ -64,18 +87,15 @@ const ProjectGallery = () => {
       : 'h-[250px] md:h-[300px]';
   };
 
-  const getModalMediaClass = (mediaType) => {
-    return mediaType === 'mobile'
-      ? 'max-h-[80vh] w-auto mx-auto'
-      : 'max-w-[90%] w-auto mx-auto';
-  };
+  const getModalMediaClass = () => 'max-h-[80vh] max-w-full w-auto h-auto mx-auto';
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
       {/* Header */}
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-4">
         <motion.h1
-          className="text-4xl md:text-6xl font-bold text-center mb-16"
+          className="text-4xl md:text-6xl font-bold text-center mb-16 dark:text-gray-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -117,7 +137,7 @@ const ProjectGallery = () => {
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-contain bg-gray-100 dark:bg-gray-700"
                     />
                   )}
                 </div>
@@ -167,22 +187,36 @@ const ProjectGallery = () => {
                 ×
               </button>
 
-              <h2 className="text-3xl font-bold mb-4">{selectedProject.title}</h2>
-              <p className="text-gray-600 mb-4">{selectedProject.description}</p>
-              <p className="text-gray-600 mb-6">{selectedProject.longDescription}</p>
+              <h2 className="text-3xl font-bold dark:text-gray-300 mb-4">{selectedProject.title}</h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">{selectedProject.description}</p>
+              <div className="prose dark:prose-invert max-w-none mb-6">
+                <p>{selectedProject.longDescription}</p>
+              </div>
 
               {/* Media */}
-              <div className="mb-6">
-                <div className={`${getModalMediaClass(selectedProject.mediaType)} rounded-lg overflow-hidden`}>
-                  {selectedProject.image.endsWith('.mp4') ? (
-                    <video autoPlay muted loop playsInline className="w-full h-full object-contain">
+              <div className="mb-6 flex justify-center items-center relative">
+                {selectedProject.image.endsWith('.mp4') ? (
+                  <>
+                    <video
+                      autoplay
+                      controls
+                      playsInline
+                      className="rounded-lg shadow-md max-h-[80vh] max-w-full w-auto h-auto"
+                    >
                       <source src={selectedProject.image} type="video/mp4" />
                     </video>
-                  ) : (
-                    <img src={selectedProject.image} alt={selectedProject.title} className="w-full h-full object-contain" />
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <img
+                    src={selectedProject.image}
+                    alt={selectedProject.title}
+                    className="rounded-lg shadow-md max-h-[80vh] max-w-full w-auto h-auto"
+                    loading="lazy"
+                  />
+                )}
               </div>
+
+
 
               {/* Buttons */}
               <div className="flex gap-4 mb-6">
@@ -197,8 +231,8 @@ const ProjectGallery = () => {
               </div>
 
               {/* Features */}
-              <h3 className="text-xl font-semibold mb-3">Key Features</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-600">
+              <h3 className="text-xl font-semibold mb-3 dark:text-gray-300">Key Features</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
                 {selectedProject.features.map((feature, index) => (
                   <li key={index}>{feature}</li>
                 ))}
