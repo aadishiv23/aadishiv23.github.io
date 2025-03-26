@@ -48,7 +48,7 @@ export default function Navigation() {
             Projects
           </a>
           <a
-            href="#experience"
+            href="/experience"
             className="relative text-gray-700 dark:text-gray-300 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
           >
             Experience
