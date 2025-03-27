@@ -1,323 +1,333 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Placeholder Icons (replace with your actual icon paths) ---
-const placeholderIcon = "/icons/placeholder-app.svg";
+// --- Icons (Keep if needed for modal, though theme uses text mainly) ---
 const radiusIcon = "/icons/radius-app.svg";
 const macboardIcon = "/icons/macboard-app.svg";
+const placeholderIcon = "/icons/placeholder-app.svg"; // For potential future use or data consistency
 
-// --- Helper for random colors (if placeholderColor is not defined) ---
-const generateFallbackColor = (id) => {
-  // Simple hash function to get a somewhat consistent color based on ID
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const color = `hsl(${hash % 360}, 70%, 80%)`; // Use HSL for pleasant colors
-  return color;
-};
+// --- Retro Tech Theme Component ---
 
-// --- AppIcon Component ---
-function AppIcon({ project, onClick }) {
-  const [imgError, setImgError] = useState(false);
-  const canOpen = !!project.media; // Check if the project has media to display
+// Configuration
+const retroSpring = { type: "spring", stiffness: 180, damping: 25 };
 
-  const effectiveIcon = project.icon || placeholderIcon;
-  const fallbackColor = project.placeholderColor || generateFallbackColor(project.id);
+// --- Component: Retro Display Window (Enhanced) ---
+function RetroDisplay({ project, onSelect }) {
+    const [glitchTrigger, setGlitchTrigger] = useState(0);
 
-  useEffect(() => {
-    // Reset error state if the icon src changes
-    setImgError(false);
-  }, [effectiveIcon]);
+    const glitchVariants = {
+        idle: { opacity: 1, x: 0, filter: 'contrast(1) brightness(1)' },
+        glitch: {
+            opacity: [1, 0.85, 1, 0.9, 1],
+            x: [0, 1, -1, 2, 0], // Subtle horizontal glitch
+            filter: ['contrast(1) brightness(1)', 'contrast(1.3) brightness(1.1)', 'contrast(1) brightness(1)'],
+            transition: { duration: 0.1, times: [0, 0.2, 0.5, 0.8, 1] }
+        }
+    };
 
-  const handleClick = () => {
-    if (canOpen) {
-      onClick();
-    }
-  };
+    const triggerGlitch = () => {
+        setGlitchTrigger(prev => prev + 1);
+    };
 
-  return (
-    <motion.div
-      layoutId={`project-card-${project.id}`} // Connects to the detail view
-      onClick={handleClick}
-      className={`flex flex-col items-center text-center ${
-        canOpen
-          ? 'cursor-pointer group' // Add group for potential inner hover effects
-          : 'opacity-60 cursor-default'
-      }`}
-      whileTap={canOpen ? { scale: 0.90 } : {}}
-      transition={{ duration: 0.2 }} // Faster tap animation
-    >
-      <motion.div
-        className={`w-16 h-16 md:w-20 md:h-20 rounded-[22.5%] // iOS-like rounding
-                   overflow-hidden shadow-md mb-2 flex items-center
-                   justify-center relative ${canOpen ? 'group-hover:scale-105 transition-transform duration-150 ease-in-out' : ''}`}
-        style={imgError ? { backgroundColor: fallbackColor } : {backgroundColor: '#e5e7eb'}} // Default bg while loading
-      >
-        {!imgError ? (
-          <img
-            src={effectiveIcon}
-            alt={`${project.title} icon`}
-            className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
-            loading="lazy" // Improve initial load performance
-          />
-        ) : (
-          // Optional: Display initials or a generic icon on color background
-          <span className="font-bold text-xl text-white opacity-70">
-            {project.title?.[0]?.toUpperCase() || '?'}
-          </span>
-        )}
-      </motion.div>
-      <span className="text-xs md:text-sm dark:text-gray-200 text-gray-800 w-full px-1 truncate">
-        {project.title}
-      </span>
-    </motion.div>
-  );
+    // Fake progress bar animation
+    const progressBarVariants = {
+        load: {
+            width: ["0%", "100%"],
+            transition: { duration: 0.8, delay: 0.2, ease: "linear" }
+        }
+    };
+
+    return (
+        <motion.div
+            layoutId={`project-retro-${project.id}`}
+            className="relative w-full max-w-sm md:max-w-md aspect-[4/3] md:aspect-video bg-black border-2 border-green-500/60 p-3 rounded-sm shadow-[0_0_15px_rgba(50,255,50,0.3)] cursor-pointer group font-mono text-sm" // Adjusted aspect ratio slightly
+            onClick={() => onSelect(project.id)}
+            onHoverStart={triggerGlitch}
+            whileHover={{ scale: 1.03, borderColor: 'rgb(50 255 50 / 0.9)', boxShadow: '0 0 25px rgba(50, 255, 50, 0.5)' }}
+            transition={retroSpring}
+        >
+            {/* Scanline Overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.4)_1px,transparent_1px)] bg-[size:100%_3px] opacity-30 pointer-events-none z-10 animate-scanline"></div>
+            {/* Subtle CRT Glow */}
+            <div className="absolute -inset-1 rounded blur bg-green-500/10 opacity-60 pointer-events-none group-hover:opacity-80 transition-opacity"></div>
+             {/* Noise Overlay */}
+             <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none z-10 mix-blend-overlay"></div>
+
+
+            {/* Content Area with Glitch */}
+            <motion.div
+                key={glitchTrigger} // Re-mount on trigger
+                variants={glitchVariants}
+                initial="idle"
+                animate="glitch"
+                className="relative z-0 text-green-400 h-full flex flex-col justify-between" // Use flex to position cursor
+            >
+                <div>
+                    <p className='mb-1 text-green-300'>> Booting Sector: {project.title.toUpperCase()}</p>
+                    <p className='mb-1 opacity-80'>> Desc: {project.description}</p>
+                    {/* Fake Progress Bar */}
+                    <div className="w-full h-2 bg-green-900/50 border border-green-700/50 my-2">
+                        <motion.div
+                            className="h-full bg-green-500"
+                            variants={progressBarVariants}
+                            initial={{ width: "0%" }} // Ensure it starts at 0 on re-trigger
+                            animate="load"
+                        ></motion.div>
+                    </div>
+                     <p className='opacity-70 text-xs'>> Tech modules: [{project.tech?.join(' ')}]</p>
+                </div>
+                <div className="self-end"> {/* Position cursor at bottom right */}
+                    <span className="w-2 h-3.5 bg-green-400 animate-pulse"></span> {/* Blinking Cursor */}
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
+
+// --- Component: Modal for Retro Details (Enhanced) ---
+function RetroDetailModal({ project, onClose }) {
+    const modalRef = useRef(null);
+
+    // ESC & Click Outside handling
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") onClose();
+        };
+        const handleClickOutside = (e) => {
+            if (modalRef.current && !modalRef.current.contains(e.target)) onClose();
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [onClose]);
+
+    return (
+        <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-[3px]" // Slightly stronger blur
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+        >
+            {/* Modal Window */}
+            <motion.div
+                ref={modalRef}
+                layoutId={`project-retro-${project.id}`}
+                className="crt-effect relative z-10 bg-[#0A100A] border-2 border-green-500/80 rounded-sm shadow-lg overflow-hidden
+                           w-full max-w-3xl max-h-[90vh] flex flex-col text-green-400 font-mono" // Use slightly off-black bg
+                transition={retroSpring}
+                style={{ boxShadow: '0 0 30px rgba(50, 255, 50, 0.4), inset 0 0 20px rgba(50, 255, 50, 0.25)' }} // Enhanced glow
+            >
+                {/* Inner content fade wrapper */}
+                <motion.div
+                    className="flex-grow flex flex-col overflow-hidden"
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    transition={{ delay: 0.1, duration: 0.2 }}
+                >
+                    {/* Header / Title Bar */}
+                    <div className="flex items-center justify-between p-1.5 px-2 bg-green-900/40 border-b-2 border-green-500/60">
+                        <div className="flex items-center gap-1.5"> {/* Fake buttons */}
+                             <div className="w-2.5 h-2.5 rounded-full bg-red-500/50 border border-red-700"></div>
+                             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50 border border-yellow-700"></div>
+                             <div className="w-2.5 h-2.5 rounded-full bg-green-500/50 border border-green-700"></div>
+                        </div>
+                        <h2 className="text-sm md:text-base font-bold text-green-300 uppercase">
+                            FILE: {project.title}.RUN
+                        </h2>
+                        <motion.button
+                            onClick={onClose} className="text-sm text-green-400 hover:text-red-300 px-1.5 bg-red-800/60 border border-red-500/70 rounded-sm"
+                            whileHover={{ scale: 1.1, filter: 'brightness(1.8)' }} whileTap={{ scale: 0.9 }}
+                            title="Close" // Add title for accessibility
+                        >_X_</motion.button> {/* Styled X */}
+                    </div>
+
+                    {/* Scanline Overlay inside modal */}
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.4)_1px,transparent_1px)] bg-[size:100%_4px] opacity-25 pointer-events-none z-10 animate-scanline"></div>
+                     {/* Noise Overlay */}
+                    <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.04] pointer-events-none z-10 mix-blend-overlay"></div>
+
+                    {/* Scrollable Content */}
+                    <div className="relative z-0 flex-grow overflow-y-auto p-3 md:p-4 space-y-4 text-sm md:text-base">
+                        {/* Media */}
+                        <div className="mb-4 bg-black/30 border border-green-700/50 p-1 flex justify-center items-center aspect-video shadow-inner">
+                             {/* Media rendering logic - slightly desaturated/blended */}
+                            {!project.media && <div className="text-green-600 p-4 text-center">> SYSTEM OFFLINE // NO VISUAL FEED_</div>}
+                            {project.media?.endsWith('.mp4') ?
+                                <video autoPlay muted loop playsInline controls className="w-full h-full object-contain mix-blend-lighten opacity-90 filter saturate-[0.8] contrast-[1.1]">
+                                    <source src={project.media} type="video/mp4" /> Video Load Error_
+                                </video> : null}
+                            {project.media && !project.media.endsWith('.mp4') ?
+                                <img src={project.media} alt={project.title} className="w-full h-full object-contain mix-blend-lighten opacity-90 filter saturate-[0.8] contrast-[1.1]" /> : null}
+                        </div>
+
+                        {/* ASCII Separator */}
+                        <p className='text-green-600 opacity-70'>========================================</p>
+
+                        {/* Details Section */}
+                        <div>
+                            <p className='text-green-300 font-bold'>> EXECUTION_LOG:</p>
+                            {/* Use the full 'details' field */}
+                            <p className="text-green-400 pl-2 mt-1 whitespace-pre-wrap">{project.details || project.description}</p>
+                        </div>
+
+                        {/* ASCII Separator */}
+                         <p className='text-green-600 opacity-70'>----------------------------------------</p>
+
+                        {/* Tech Stack Section */}
+                        <div>
+                            <p className='text-green-300 font-bold'>> CORE_MODULES:</p>
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 pl-2 mt-1">
+                                {project.tech?.map(tech => (
+                                    <span key={tech} className="text-green-400">{`* ${tech}`}</span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Blinking cursor at the end of content */}
+                        <div className="pt-3">
+                            <span className="w-2 h-4 bg-green-400 animate-pulse inline-block"></span>
+                             <span className='text-green-600 ml-2'>READY.</span>
+                        </div>
+                    </div>
+                </motion.div>
+                 {/* CRT Vignette/Curvature Effect */}
+                 <div className="crt-pseudo-elements"></div>
+            </motion.div>
+        </motion.div>
+    );
 }
 
 
-// --- Main Projects Component ---
+// --- Main Retro Tech Projects Component ---
 export default function Projects() {
-  const [selectedId, setSelectedId] = useState(null);
-  const [isHoveringHomeArea, setIsHoveringHomeArea] = useState(false);
+     const [selectedId, setSelectedId] = useState(null);
 
-  const projects = [
-    {
-      id: 'radius',
-      title: 'Radius',
-      description: 'Real-time location tracking with AR capabilities',
-      tech: ['Swift', 'ARKit', 'CoreLocation'],
-      media: '/videos/Radius_beta.mp4',
-      icon: radiusIcon,
-      placeholderColor: '#a7f3d0', // Example color
-    },
-    {
-      id: 'macBoard',
-      title: 'macBoard',
-      description: 'SwiftUI based MacOS clipboard manager',
-      tech: ['Swift', 'SwiftUI', 'AppKit'],
-      media: '/images/macboard_img.png',
-      icon: macboardIcon,
-      placeholderColor: '#bfdbfe', // Example color
-    },
-    // --- Placeholder Projects ---
-    {
-      id: 'placeholder1',
-      title: 'Soon™',
-      description: 'An exciting new project is coming.',
-      tech: ['???'],
-      media: null,
-      icon: null, // Will use placeholder icon and generated color
-    },
-     {
-      id: 'placeholder2',
-      title: 'Ideas',
-      description: 'Working on cool new concepts.',
-      tech: ['Brain'],
-      media: null,
-       icon: null,
-    },
-     {
-      id: 'placeholder3',
-      title: 'Top Secret',
-      description: 'Cannot disclose yet!',
-      tech: ['Stealth'],
-       media: null,
-       icon: placeholderIcon, // Can explicitly use placeholder
-       placeholderColor: '#fecaca',
-    },
-     {
-      id: 'placeholder4',
-      title: 'Project X',
-      description: 'Exploratory phase.',
-      tech: ['R&D'],
-      media: null,
-       icon: null,
-    },
-  ];
+    // --- Using your project data structure ---
+     const allProjects = [
+         {
+            id: 'radius',
+            title: 'Radius',
+            description: 'Location based social game', // Slightly more retro desc
+            tech: ['MapKit', 'SwiftUI', 'PostgreSQL'], // Adjusted tech names
+            media: '/videos/Radius_beta.mp4',
+            icon: radiusIcon, // Keep for potential data use
+            highlighted: true,
+            details: 'System online. Real-time social game synchronised with CoreLocation data streams. Supabase utilized for multi-user coordinate sharing. Performance optimizations ongoing for efficiency and UI improvements. Shipped v1 to App Store Dec 2024. v2 coming Summer 2025.',
+        },
+        {
+            id: 'macBoard',
+            title: 'macBoard',
+            description: 'Clipboard Manager', // Slightly more retro desc
+            tech: ['SwiftUI', 'AppKit', 'Menu Bar'], // Adjusted tech names
+            media: '/images/macboard_img.png',
+            icon: macboardIcon,
+            highlighted: true,
+            details: 'Clipboard history manager initialized. CoreData module managing persistent storage. Simple SwiftUI interface. Supports text and image data formats. Ready for user input.',
+        },
+        // --- Placeholder Projects (won't be displayed via RetroDisplay) ---
+        { id: 'p1', title: 'Project Gemini', description: 'Network Protocol', tech: ['TCP/IP', 'Sockets'], media: null, icon: null },
+        { id: 'p2', title: 'MindLink', description: 'Neural Interface', tech: ['EEG', 'BioAmp'], media: null, icon: null },
+        { id: 'p3', title: 'StealthOS', description: 'Secure Kernel', tech: ['Assembly', 'Crypto'], media: null, icon: placeholderIcon, },
+        { id: 'p4', title: 'ChronoShift', description: 'Time Dilation Exp.', tech: ['Quantum'], media: null, icon: null, },
+     ];
 
-  const selectedProject = projects.find((p) => p.id === selectedId);
+     const highlightedProjects = allProjects.filter(p => p.highlighted);
+     const selectedProject = allProjects.find(p => p.id === selectedId);
 
-  const closeProject = () => {
-    setSelectedId(null);
-    setIsHoveringHomeArea(false); // Reset hover state on close
-  };
+    return (
+        <section id="projects-retro" className="py-16 md:py-24 bg-black text-green-400 font-mono overflow-hidden relative">
+            {/* Global Noise Overlay */}
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.025] pointer-events-none z-0 mix-blend-overlay"></div>
 
-  // Animation Variants for performance tuning
-  const modalVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
-
-  const cardVariants = {
-     // hidden/visible implicitly handled by layoutId, but we can add fades
-     hidden: { opacity: 0, scale: 0.95 },
-     visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }, // Smoother ease
-     exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2, ease: [0.7, 0, 0.84, 0] } },
-  };
-
-  const contentVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { delay: 0.1, duration: 0.3 } }, // Slight delay for content
-  };
-
-  const dynamicIslandVariants = {
-    hidden: { opacity: 0, scale: 0.5, y: 10 },
-    visible: { opacity: 1, scale: 1, y: -25, transition: { type: 'spring', stiffness: 300, damping: 20 } },
-    exit: { opacity: 0, scale: 0.5, y: 10, transition: { duration: 0.15 } },
-  };
-
-
-  return (
-    <section id="projects" className="section-padding overflow-hidden">
-      <div className="container mx-auto px-4 mt-5">
-        <motion.h2
-          className="text-4xl md:text-6xl font-bold gradient-text mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          Projects
-        </motion.h2>
-
-        {/* --- Home Screen Icon Grid --- */}
-        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-y-8 gap-x-4 justify-items-center mb-20">
-          {projects.map((project) => (
-            <AppIcon
-              key={project.id}
-              project={project}
-              onClick={() => setSelectedId(project.id)}
-            />
-          ))}
-        </div>
-
-        {/* --- App Detail View (Animated Modal) --- */}
-        {/* AnimatePresence initial={false} can sometimes help performance */}
-        <AnimatePresence initial={false}>
-          {selectedId && selectedProject && (
-            <motion.div
-              key="modal-backdrop" // Added key for AnimatePresence
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
-              variants={modalVariants} // Using variants
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              transition={{ duration: 0.3, ease: "easeInOut" }} // Faster backdrop fade
-            >
-              {/* Background Overlay */}
-               <motion.div
-                   className="absolute inset-0 bg-black/60 backdrop-blur-md"
-                   onClick={closeProject} // Close on overlay click
-                   initial={{ opacity: 0 }}
-                   animate={{ opacity: 1 }}
-                   exit={{ opacity: 0 }}
-                   transition={{ duration: 0.3 }}
-               />
-
-              {/* Card Content - uses layoutId */}
-              <motion.div
-                layoutId={`project-card-${selectedId}`} // Match the icon's layoutId
-                className="relative z-10 bg-white dark:bg-gray-800 rounded-[2rem] // Larger, smoother radius
-                           shadow-xl overflow-hidden w-full max-w-4xl max-h-[90vh] flex flex-col"
-                // Using variants for card *content* fade/scale, layout handles the morph
-                // We apply cardVariants here to control the overall card appearance *during* the layout animation
-                // Let layoutId handle the main transform/size animation
-                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} // Match duration with layout
-              >
-                {/* Content Area - Animate content separately */}
-                <motion.div
-                    className="flex-grow overflow-y-auto p-4 md:p-6"
-                    variants={contentVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden" // Ensures content fades out on close
+            <div className="container mx-auto px-4 relative z-10">
+                <motion.h2
+                    className="text-3xl md:text-5xl font-bold text-green-300 mb-12 md:mb-16 text-center uppercase tracking-widest" // Wider tracking
+                    initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 >
-                  {/* Media */}
-                  <div className="mb-4 rounded-lg overflow-hidden bg-black flex justify-center items-center aspect-[16/9] md:aspect-video"> {/* Maintain aspect ratio more strictly if needed */}
-                    {selectedProject.media.endsWith('.mp4') ? (
-                      <video
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        controls
-                        className="w-full h-full object-contain" // Contain within the aspect ratio box
-                        key={selectedProject.media} // Force re-render
-                      >
-                        <source src={selectedProject.media} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-                    ) : (
-                      <img
-                        src={selectedProject.media}
-                        alt={selectedProject.title}
-                        className="w-full h-full object-contain" // Contain within the aspect ratio box
-                      />
-                    )}
-                  </div>
+                    [ Project Directory ]
+                </motion.h2>
 
-                  {/* Details */}
-                  <h3 className="text-2xl md:text-3xl font-bold dark:text-white text-gray-900 mb-2 px-2">
-                    {selectedProject.title}
-                  </h3>
-                  <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-4 px-2">
-                    {selectedProject.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2 px-2">
-                    {selectedProject.tech.map((tech) => (
-                      <span
-                        key={tech}
-                        className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-md font-medium"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </motion.div> {/* End Content Area */}
+                 {/* Highlighted Projects */}
+                 <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-12 mb-16">
+                     {highlightedProjects.map((project, index) => (
+                          <motion.div
+                             key={project.id}
+                             initial={{ opacity: 0, filter: 'blur(8px) brightness(0.5)' }} // Start more blurred/dim
+                             animate={{ opacity: 1, filter: 'blur(0px) brightness(1)' }}
+                             transition={{ delay: 0.3 + index * 0.2, duration: 0.5, ease: 'easeOut' }}
+                          >
+                             <RetroDisplay project={project} onSelect={setSelectedId} />
+                          </motion.div>
+                     ))}
+                 </div>
 
-                {/* --- Home Bar Area with Hover --- */}
-                <div
-                  className="relative flex-shrink-0 h-12 md:h-14 flex items-center justify-center mt-auto pb-2 md:pb-3"
-                  onMouseEnter={() => setIsHoveringHomeArea(true)}
-                  onMouseLeave={() => setIsHoveringHomeArea(false)}
-                >
-                  {/* The visible Home Bar */}
-                  <motion.button
-                    onClick={closeProject}
-                    className="w-32 md:w-40 h-1.5 bg-gray-400 dark:bg-gray-600 rounded-full cursor-pointer"
-                    aria-label="Close project details"
-                    whileHover={{ backgroundColor: 'rgb(107 114 128)' }} // Use rgb for consistency
-                    transition={{ duration: 0.1 }} // Quick hover feedback
-                  />
+                 {/* Link to All Projects */}
+                 <div className="text-center">
+                      <motion.a
+                         href="/projects" // Make sure this path is correct
+                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-900/70 border border-green-600/80 text-green-300
+                                    rounded-sm hover:bg-green-800/80 hover:text-white hover:border-green-400 transition-all text-base uppercase shadow-[0_0_8px_rgba(50,255,50,0.2)]" // Subtle glow on button
+                         whileHover={{ scale: 1.05, filter: 'brightness(1.3)', boxShadow: '0 0 15px rgba(50, 255, 50, 0.4)' }}
+                         whileTap={{ scale: 0.95 }}
+                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                     >
+                         <span>>> Load Full Index</span> {/* Different prompt style */}
+                     </motion.a>
+                 </div>
+            </div>
 
-                  {/* Dynamic Island Close Button */}
-                  <AnimatePresence>
-                    {isHoveringHomeArea && (
-                      <motion.button
-                        key="dynamic-close-button"
-                        variants={dynamicIslandVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        onClick={closeProject}
-                        className="absolute right-4 md:right-6 bottom-10 md:bottom-12 w-10 h-10 bg-gray-700/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer"
-                        aria-label="Close project"
-                      >
-                         {/* Simple X icon */}
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                         </svg>
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
-                </div> {/* End Home Bar Area */}
-              </motion.div> {/* End Card Content */}
-            </motion.div> /* End Modal Backdrop */
-          )}
-        </AnimatePresence>
-      </div>
-    </section>
-  );
+            <AnimatePresence>
+                 {selectedId && selectedProject && (
+                     <RetroDetailModal project={selectedProject} onClose={() => setSelectedId(null)} />
+                 )}
+             </AnimatePresence>
+
+             {/* CSS for Scanline, CRT effects, Noise (Ensure noise.png is in /public) */}
+             <style jsx global>{`
+                @keyframes scanline {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(4px); } // Adjust distance (matches bg size Y in modal)
+                }
+                .animate-scanline {
+                    animation: scanline 0.18s linear infinite; // Slightly slower scanline
+                }
+                /* CRT Vignette & Curvature Simulation */
+                .crt-effect {
+                    position: relative;
+                }
+                .crt-pseudo-elements::before,
+                .crt-pseudo-elements::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    border-radius: inherit; /* Match parent's border-radius */
+                    pointer-events: none;
+                    z-index: 20; /* Above content, below modal controls */
+                }
+                .crt-pseudo-elements::before {
+                     /* Inner shadow for vignette */
+                    box-shadow: inset 0 0 40px 15px rgba(0, 0, 0, 0.5);
+                }
+                 /* Optional: Add pseudo element for slight curvature if desired */
+                /* .crt-pseudo-elements::after { */
+                    /* background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 60%); */
+                    /* transform: scale(1.1); */ /* Scale to simulate bulge */
+                /* } */
+
+                /* Noise background needs a noise texture */
+                 /* Make sure you have a noise.png in your public folder */
+
+                 /* Blinking cursor animation */
+                 @keyframes blink {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0; }
+                 }
+                 .animate-pulse { /* Tailwind uses pulse for opacity, let's override for solid blink */
+                    animation: blink 1s step-end infinite;
+                 }
+
+             `}</style>
+        </section>
+    );
 }
