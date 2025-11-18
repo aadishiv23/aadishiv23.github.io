@@ -1,0 +1,32 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="finderBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3f87ff" />
+      <stop offset="100%" stop-color="#1460d2" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#finderBg)" />
+  <path
+    d="M19 32h90v64H19z"
+    fill="#ffffff"
+    opacity="0.1"
+  />
+  <path
+    d="M64 22c6 10 6 26 0 36s-6 26 0 36"
+    stroke="#ffffff"
+    stroke-width="8"
+    stroke-linecap="round"
+    opacity="0.7"
+  />
+  <g fill="#0d2249">
+    <circle cx="44" cy="56" r="6" />
+    <circle cx="84" cy="56" r="6" />
+  </g>
+  <path
+    d="M46 78c6 6 30 6 36 0"
+    stroke="#0d2249"
+    stroke-width="6"
+    stroke-linecap="round"
+    opacity="0.75"
+  />
+</svg>
