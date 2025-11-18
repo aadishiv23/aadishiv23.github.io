@@ -1,26 +1,26 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Github, ExternalLink, X, Maximize2, Minimize2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from 'framer-motion';
+import { Github, ExternalLink, X, ChevronRight, ArrowRight } from 'lucide-react';
 
-// --- Project Data ---
+// --- Project Data (Enhanced) ---
 const projects = [
   {
     id: 'radius',
     title: 'Radius',
-    description: 'Real-time location sharing with AR visualizations and social presence.',
+    subtitle: 'Social AR Experience',
+    description: 'Real-time location sharing with AR visualizations.',
     longDescription:
-      'Radius is a privacy-minded location sharing app that pairs realtime presence with spatial storytelling. Swift and Go services stream updates to 500+ concurrent users while RealityKit scenes anchor friends in AR, perfect for campus meetups.',
-    tech: ['Swift', 'Go', 'PostgreSQL', 'Swift Concurrency', 'ARKit', 'RealityKit'],
+      'Radius reimagines social connection through spatial computing. By combining real-time location streaming with ARKit, it allows users to see their friends\' locations anchored in the real world. The backend, built with Go and PostgreSQL, handles high-frequency updates for over 500 concurrent users, while the iOS client leverages Swift Concurrency for a buttery smooth experience.',
+    tech: ['Swift', 'Go', 'PostgreSQL', 'ARKit', 'RealityKit'],
     image: '/videos/Radius_beta.mp4',
-    mediaType: 'mobile',
+    mediaType: 'video',
     features: [
-      'Handles 10,000+ concurrent requests with Go microservices and PostgreSQL.',
-      'Live location handoff to SwiftUI map, backed by Swift Concurrency pipelines.',
-      'Presence-aware notifications and social circles that adapt to proximity.',
-      'RealityKit prototype pins friends in AR with anchored coordinates.',
-      'Interactive geofences created via map pins or address search.',
+      'High-performance Go microservices',
+      'Real-time AR location anchoring',
+      'Proximity-based social circles',
+      'Interactive 3D geofences',
     ],
-    accent: '#0ea5e9',
+    accent: '#0ea5e9', // Sky blue
     links: {
       live: 'https://apps.apple.com/us/app/radius-get-moving/id6504736869',
     },
@@ -28,24 +28,20 @@ const projects = [
   {
     id: 'iris',
     title: 'Iris',
-    description: 'An on-device assistant powered by a custom 3B-parameter MLX model.',
+    subtitle: 'On-Device Intelligence',
+    description: 'Personal assistant powered by a local 3B-parameter model.',
     longDescription:
-      'Iris is a local-first, privacy-respecting assistant that blends Apple Intelligence-style tooling with personal context. Built with MLX and CSM-MLX models, Iris keeps latency under five seconds while orchestrating Swift actions.',
-    tech: ['Swift', 'MLX', 'CSM-MLX', 'Swift Concurrency', 'Vision'],
-    image: null,
-    fallback: {
-      gradientClass: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-blue-400',
-      glyph: 'AI',
-    },
-    mediaType: 'desktop',
+      'Iris brings the power of Large Language Models directly to your device, ensuring total privacy. Running a custom distilled 3B parameter model via MLX, Iris can understand context, control system apps, and process multi-modal input—all without sending a single byte to the cloud. It represents the future of personal, private AI.',
+    tech: ['Swift', 'MLX', 'Python', 'CoreML', 'App Intents'],
+    image: '/images/projects/iris.png', // Assuming image exists, fallback handled
+    mediaType: 'image',
     features: [
-      'Custom 3B-parameter model distilled for on-device inference.',
-      'Tool calling architecture without JSON payload overhead.',
-      'Multi-modal chat interface mixing text, voice, and screenshots.',
-      'Latencies optimized from 10s+ down to ~5s with bespoke parsers.',
-      'Runs fully locally across macOS + iOS with shared state.',
+      'Local 3B parameter LLM inference',
+      'System-wide App Intents control',
+      'Multi-modal input (Text, Voice, Image)',
+      '< 5s latency on Apple Silicon',
     ],
-    accent: '#a855f7',
+    accent: '#a855f7', // Purple
     links: {
       github: 'https://github.com/aadishiv23',
     },
@@ -53,501 +49,278 @@ const projects = [
   {
     id: 'pillpals',
     title: 'PillPals',
-    description: 'A medication companion tailored for patients experiencing memory loss.',
+    subtitle: 'Health & Accessibility',
+    description: 'Medication tracker designed for memory loss patients.',
     longDescription:
-      'PillPals is a SwiftUI app co-designed with caregivers to keep medication schedules approachable. App Intents and WidgetKit surface gentle reminders while HealthKit sync keeps clinicians looped in.',
-    tech: ['Swift', 'SwiftUI', 'HealthKit', 'WidgetKit', 'App Intents'],
-    image: null,
-    fallback: {
-      gradientClass: 'bg-gradient-to-br from-rose-400 via-orange-300 to-yellow-200',
-      glyph: 'RX',
-    },
-    mediaType: 'mobile',
+      'Designed with empathy at its core, PillPals simplifies medication management for those who need it most. Its high-contrast interface, large touch targets, and gentle reminders are tailored for users with memory impairments. Deep integration with HealthKit and WidgetKit ensures that care circles stay informed and patients stay healthy.',
+    tech: ['Swift', 'SwiftUI', 'HealthKit', 'WidgetKit'],
+    image: '/images/projects/pillpals.png',
+    mediaType: 'image',
     features: [
-      'WidgetKit timeline cards with friendly, high-contrast reminders.',
-      'HealthKit integration for medication adherence insights.',
-      'App Intents for hands-free updates via Siri or Shortcuts.',
-      'User testing improved usability scores by 40% versus baseline.',
-      'Caregiver handoff view highlights trends and missed doses.',
+      'Accessibility-first design system',
+      'Critical alert infrastructure',
+      'Caregiver dashboard & sync',
+      'Siri & Shortcuts integration',
     ],
-    accent: '#f97316',
+    accent: '#f97316', // Orange
     links: {
       github: 'https://github.com/aadishiv23',
     },
   },
 ];
 
+// --- 3D Tilt Card Component ---
+const TiltCard = ({ project, onClick, index }) => {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-// --- Media Component (Handles rendering and layoutId) ---
-const ProjectMediaDisplay = ({
-  project,
-  layoutId,
-  objectFitClass = 'object-cover',
-  className = '',
-  inZoomView = false,
-  onLoadSuccess, // <<< New prop to report dimensions
-  ...props
-}) => {
-  const mediaSrc = project.image;
-  const hasMedia = Boolean(mediaSrc);
-  const isVideo = hasMedia ? mediaSrc.endsWith('.mp4') : false;
-  const uniqueKey = `${layoutId}-${objectFitClass}-${inZoomView}`;
-  const fallback = project.fallback;
+  const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
+  const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
 
-  if (!hasMedia && fallback) {
-    return (
-      <motion.div
-        key={`${layoutId}-fallback`}
-        layoutId={`${layoutId}-fallback`}
-        className={`flex items-center justify-center ${objectFitClass} ${className} ${fallback.gradientClass || 'bg-slate-400'}`}
-        initial={false}
-        {...props}
-      >
-        <span className="text-white text-3xl font-semibold tracking-wide">{fallback.glyph || project.title[0]}</span>
-      </motion.div>
-    );
-  }
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [7, -7]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-7, 7]);
 
-  if (!hasMedia) {
-    return (
-      <motion.div
-        key={`${layoutId}-blank`}
-        layoutId={`${layoutId}-blank`}
-        className={`flex items-center justify-center ${objectFitClass} ${className} bg-slate-400`}
-        initial={false}
-        {...props}
-      >
-        <span className="text-white text-2xl font-semibold">{project.title?.charAt(0) || '?'}</span>
-      </motion.div>
-    );
-  }
-
-  // Memoize the handler using useCallback to prevent unnecessary re-renders
-  const handleLoad = useCallback((event) => {
-      if (onLoadSuccess) {
-          const target = event.target;
-          if (isVideo && target) {
-              onLoadSuccess({ width: target.videoWidth, height: target.videoHeight });
-          } else {
-              onLoadSuccess({ width: target.naturalWidth, height: target.naturalHeight });
-          }
-      }
-  }, [onLoadSuccess, isVideo]); // Dependencies for useCallback
-
-  if (isVideo) {
-      return (
-          <motion.video
-              key={uniqueKey}
-              layoutId={layoutId}
-              alt={`${project.title} ${inZoomView ? 'zoomed view' : 'preview'}`}
-              className={`block ${objectFitClass} ${className}`}
-              initial={false}
-              playsInline
-              onLoadedMetadata={handleLoad} // <<< Attach handler here
-              {...props}
-          >
-              <source src={project.image} type="video/mp4" />
-              Your browser does not support the video tag.
-          </motion.video>
-      );
-  } else {
-      return (
-          <motion.img
-              key={uniqueKey}
-              layoutId={layoutId}
-              src={project.image}
-              alt={`${project.title} ${inZoomView ? 'zoomed view' : 'preview'}`}
-              className={`block ${objectFitClass} ${className}`}
-              initial={false}
-              loading="lazy"
-              onLoad={handleLoad} // <<< Attach handler here
-              {...props}
-          />
-      );
-  }
-};
-
-
-// --- Project Card Component (Refined UI) ---
-const ProjectCard = ({ project, onClick, layout = 'standard' }) => {
-    const layoutId = `project-media-${project.id}`;
-    const isFeatured = layout === 'featured';
-    const accent = project.accent || '#3b82f6';
-
-    return (
-      <motion.button
-        layout
-        onClick={() => onClick(project)}
-        className={`group relative overflow-hidden rounded-[22px] border-2 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl text-left transition-all ${
-          isFeatured ? 'md:col-span-2 xl:col-span-2' : ''
-        }`}
-        style={{
-          borderColor: `${accent}33`,
-          boxShadow: `0 10px 35px -15px ${accent}66, inset 0 1px 0 rgba(255,255,255,.15)`,
-        }}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileHover={{
-          y: -6,
-          scale: 1.01,
-          boxShadow: `0 20px 45px -20px ${accent}, inset 0 1px 0 rgba(255,255,255,.3)`,
-        }}
-      >
-        <div className="px-5 pt-4 flex items-center justify-between text-[11px] uppercase tracking-[0.35em] text-slate-400">
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-red-400/80 shadow-sm" />
-            <span className="w-3 h-3 rounded-full bg-amber-300/80 shadow-sm" />
-            <span className="w-3 h-3 rounded-full bg-emerald-300/80 shadow-sm" />
-          </div>
-          <span>{project.mediaType === 'mobile' ? 'Mobile' : 'Desktop'}</span>
-        </div>
-
-        <div className={`relative mx-5 mt-4 ${isFeatured ? 'h-64' : 'h-52'} rounded-[18px] overflow-hidden`}>
-          <div
-            className="absolute inset-0 rounded-[18px]"
-            style={{
-              background: `linear-gradient(135deg, ${accent}22, transparent)`,
-            }}
-          />
-          <ProjectMediaDisplay
-            project={project}
-            layoutId={layoutId}
-            objectFitClass="object-contain"
-            className="absolute inset-0 w-full h-full p-3"
-            autoPlay
-            muted
-            loop
-          />
-        </div>
-
-        <div className="p-5 flex flex-col gap-3">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Featured build</p>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{project.title}</h3>
-          </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-3">{project.description}</p>
-          <div className="flex flex-wrap gap-2 pt-2">
-            {project.tech.slice(0, 4).map(tech => (
-              <span
-                key={tech}
-                className="rounded-full border px-3 py-1 text-xs font-semibold"
-                style={{ borderColor: `${accent}55`, color: accent }}
-              >
-                {tech}
-              </span>
-            ))}
-            {project.tech.length > 4 && (
-              <span className="rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1 text-xs text-slate-400">
-                +{project.tech.length - 4}
-              </span>
-            )}
-          </div>
-        </div>
-      </motion.button>
-    );
-};
-
-const ProjectHero = ({ projectCount }) => (
-  <section className="text-center max-w-4xl mx-auto mb-16 space-y-6">
-    <p className="text-[13px] uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">AadiOS Labs</p>
-    <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold text-slate-900 dark:text-white">
-      Delightful Apple platform experiments
-    </h1>
-    <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 px-4">
-      A curated desk of {projectCount}+ projects spanning product engineering, on-device AI, App Intents,
-      and SwiftUI craftsmanship. Double-click (or tap) to open a window and explore the build.
-    </p>
-    <div className="flex flex-wrap justify-center gap-3 text-xs uppercase tracking-[0.3em]">
-      {['SwiftUI', 'App Intents', 'RealityKit', 'MLX'].map(token => (
-        <span
-          key={token}
-          className="rounded-full border border-white/60 bg-white/70 px-4 py-1 text-slate-600 dark:bg-white/10 dark:border-white/15 dark:text-white/80"
-        >
-          {token}
-        </span>
-      ))}
-    </div>
-  </section>
-);
-
-
-// --- Project Modal Component (ADAPTIVE LAYOUT) ---
-const ProjectModal = ({ project, onClose }) => {
-  const [isMediaZoomed, setIsMediaZoomed] = useState(false);
-  const [mediaDimensions, setMediaDimensions] = useState(null); // State for dimensions
-  const layoutId = `project-media-${project.id}`;
-  const accent = project.accent || '#6366f1';
-
-  // Reset dimensions when project changes
-  useEffect(() => {
-      setMediaDimensions(null);
-      setIsMediaZoomed(false); // Also reset zoom
-  }, [project]);
-
-  // Determine layout based on loaded dimensions
-  // Default to 'false' (standard layout) until dimensions are loaded and height > width
-  const isVerticalLayout = mediaDimensions
-      ? mediaDimensions.height > mediaDimensions.width
-      : false;
-
-  // Handler passed to ProjectMediaDisplay
-  const handleMediaLoadSuccess = useCallback((dimensions) => {
-      setMediaDimensions(dimensions);
-  }, []); // Empty dependency array, setMediaDimensions is stable
-
-  // Effect for Escape key and scroll lock
-  useEffect(() => {
-    const handleEsc = event => {
-      if (event.key === 'Escape') {
-        if (isMediaZoomed) setIsMediaZoomed(false);
-        else onClose();
-      }
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose, isMediaZoomed]);
-
-  const handleZoomToggle = (e) => {
-      e.stopPropagation();
-      setIsMediaZoomed(!isMediaZoomed);
+  const handleMouseMove = (e) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseXFromCenter = e.clientX - rect.left - width / 2;
+    const mouseYFromCenter = e.clientY - rect.top - height / 2;
+    x.set(mouseXFromCenter / width);
+    y.set(mouseYFromCenter / height);
   };
 
-  const stopPropagation = (e) => e.stopPropagation();
-
-  // --- CONDITIONAL CLASSES based on isVerticalLayout ---
-  const modalRootClasses = `bg-white/95 dark:bg-slate-900/95 rounded-3xl w-full max-w-[95%] md:max-w-5xl max-h-[95%] overflow-hidden relative flex shadow-[0_25px_80px_rgba(15,23,42,0.45)] ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 ease-in-out ${
-    isVerticalLayout ? 'flex-col lg:flex-row' : 'flex-col'
-  }`;
-  const mediaContainerClasses = `relative bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden transition-all duration-300 ${
-    isVerticalLayout ? 'lg:w-2/5 w-full min-h-[280px]' : 'w-full min-h-[260px] sm:min-h-[360px]'
-  }`;
-  const mediaElementWrapperClasses = `relative max-w-full max-h-full p-3 ${isVerticalLayout ? 'h-full w-full' : ''}`;
-  const contentContainerClasses = `flex-1 flex flex-col ${
-    isVerticalLayout ? 'overflow-y-auto lg:max-h-full' : ''
-  }`;
-  const contentPaddingClasses = 'p-6 md:p-8 space-y-6 flex-1 flex flex-col';
-
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   return (
-      <>
-          {/* --- Modal Backdrop and Container --- */}
+    <motion.div
+      ref={ref}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={() => onClick(project)}
+      className="relative h-[450px] w-[320px] md:w-[380px] flex-shrink-0 cursor-pointer group perspective-1000"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+    >
+      <motion.div
+        layoutId={`card-container-${project.id}`}
+        className="absolute inset-0 rounded-[32px] overflow-hidden bg-slate-900 shadow-2xl"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        {/* Background Image/Video */}
+        <div className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+          {project.mediaType === 'video' ? (
+            <motion.video
+              layoutId={`media-${project.id}`}
+              src={project.image}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+            />
+          ) : (
+            <motion.img
+              layoutId={`media-${project.id}`}
+              src={project.image}
+              alt={project.title}
+              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+            />
+          )}
+        </div>
+
+        {/* Content Overlay */}
+        <div className="absolute inset-0 z-20 p-8 flex flex-col justify-end transform translate-z-20">
           <motion.div
-              data-modal-active="true"
-              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md z-30 flex items-center justify-center p-4"
-              // ... (rest of backdrop props)
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onClose}
-              transition={{ duration: 0.3 }}
+            layoutId={`content-${project.id}`}
+            className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
           >
-              {/* Modal Content Box */}
-              <motion.div
-                  layout // Animate layout changes smoothly
-                  className={modalRootClasses} // Use dynamic classes
-                  style={{ borderColor: `${accent}33` }}
-                  // ... (rest of modal container props)
-                  initial={{ scale: 0.9, y: 30, opacity: 0 }}
-                  animate={{ scale: 1, y: 0, opacity: 1 }}
-                  exit={{ scale: 0.95, y: 20, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8, layout: { duration: 0.3 } }} // Add layout transition duration
-                  onClick={stopPropagation}
-              >
-                  {/* Close Button */}
-                  <button
-                    onClick={onClose}
-                    className="absolute top-3 right-3 z-30 rounded-full p-1.5 backdrop-blur bg-white/70 text-slate-600 shadow hover:bg-white"
-                    aria-label="Close project details"
-                    style={{ color: accent }}
-                  >
-                    <X size={20} />
-                  </button>
+            <p className="text-sm font-medium text-white/70 mb-2 uppercase tracking-widest">
+              {project.subtitle}
+            </p>
+            <h3 className="text-4xl font-bold text-white mb-3 tracking-tight">
+              {project.title}
+            </h3>
+            <p className="text-white/80 line-clamp-2 mb-6 text-lg font-light">
+              {project.description}
+            </p>
 
-                  {/* ===== Media Column/Row ===== */}
-                  {/* Animate this container's layout changes */}
-                  <motion.div layout className={mediaContainerClasses}>
-                      {/* Wrapper to handle padding and centering */}
-                      <div className={mediaElementWrapperClasses}>
-                           {!isMediaZoomed && (
-                              <ProjectMediaDisplay
-                                  project={project}
-                                  layoutId={layoutId}
-                                  objectFitClass="object-contain"
-                                  // Max height needed for both layouts
-                                  className="max-w-full max-h-[85vh] w-auto h-auto rounded-lg shadow-md"
-                                  controls
-                                  autoPlay
-                                  onLoadSuccess={handleMediaLoadSuccess} // <<< Pass handler
-                              />
-                          )}
-                      </div>
-                      {/* Zoom Button (positioned relative to media container) */}
-                      {!isMediaZoomed && (
-                           <button
-                              onClick={handleZoomToggle}
-                              className="absolute bottom-3 right-3 z-10 bg-gray-900/50 backdrop-blur-sm text-white rounded-full p-2 hover:bg-gray-900/80 transition-all"
-                              aria-label="Zoom media"
-                          >
-                              <Maximize2 size={18} />
-                          </button>
-                       )}
-                  </motion.div>
-
-                  {/* ===== Content Column/Row ===== */}
-                   {/* Animate this container's layout changes */}
-                  <motion.div layout className={contentContainerClasses}>
-                       {/* Inner div for padding and content */}
-                      <div className={contentPaddingClasses}>
-                          {/* Title */}
-                          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-0" style={{ color: accent }}>
-                              {project.title}
-                          </h2>
-
-                          {/* Long Description */}
-                           <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
-                              <p>{project.longDescription}</p>
-                          </div>
-
-                          {/* Features */}
-                          {project.features?.length > 0 && (
-                              <div>
-                              <h3 className="text-lg font-semibold mb-2.5 text-gray-800 dark:text-gray-200" style={{ color: accent }}>
-                                Key Features
-                              </h3>
-                                  <ul className="list-disc list-outside pl-5 space-y-1.5 text-gray-600 dark:text-gray-400 text-sm">
-                                      {project.features.map((feature, index) => (
-                                          <li key={index}>{feature}</li>
-                                      ))}
-                                  </ul>
-                              </div>
-                          )}
-
-                           {/* Tech Stack */}
-                          <div>
-                              <h3 className="text-lg font-semibold mb-2.5 text-gray-800 dark:text-gray-200" style={{ color: accent }}>
-                                Technologies
-                              </h3>
-                              <div className="flex flex-wrap gap-2">
-                                  {project.tech.map((tech) => (
-                                      <span
-                                        key={tech}
-                                        className="rounded-full px-3 py-1 text-xs sm:text-sm font-medium"
-                                        style={{ background: `${accent}15`, color: accent }}
-                                      >
-                                          {tech}
-                                      </span>
-                                  ))}
-                              </div>
-                          </div>
-
-                          {/* Buttons - mt-auto pushes to bottom */}
-                         <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700/60 mt-auto">
-                             {project.links.github && (
-                                  <a
-                                    href={project.links.github}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition shadow-sm"
-                                    style={{ borderColor: accent, color: accent }}
-                                  >
-                                      <Github size={16} /> Code
-                                  </a>
-                              )}
-                              {project.links.live && (
-                                  <a
-                                    href={project.links.live}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-lg transition hover:translate-y-0.5"
-                                    style={{ background: accent, color: '#0f172a' }}
-                                  >
-                                      <ExternalLink size={16} /> { project.links.live.includes('apple.com') ? 'App Store' : 'Live Demo' }
-                                  </a>
-                              )}
-                          </div>
-                      </div>
-                  </motion.div>
-              </motion.div>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+              <span className="text-white font-medium">View Project</span>
+              <ArrowRight className="w-4 h-4 text-white" />
+            </div>
           </motion.div>
-
-          {/* --- Zoomed Media Overlay (No change) --- */}
-          <AnimatePresence>
-              {isMediaZoomed && (
-                  <motion.div
-                      // ... zoom overlay props ...
-                      data-modal-active="true"
-                      data-zoom-active="true"
-                      className="fixed inset-0 bg-black/90 z-[60] flex flex-col items-center justify-center p-4"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setIsMediaZoomed(false)}
-                      transition={{ duration: 0.2 }}
-                  >
-                       {/* Minimize Button */}
-                       <button
-                          // ... minimize button props ...
-                          onClick={handleZoomToggle}
-                          className="absolute top-4 right-4 z-10 bg-gray-100/10 backdrop-blur-sm text-white/70 rounded-full p-2 hover:bg-gray-100/20 hover:text-white transition-all"
-                          aria-label="Minimize media"
-                      >
-                          <Minimize2 size={24} />
-                      </button>
-
-                       {/* Zoomed media container */}
-                      <motion.div
-                           // ... zoomed container props ...
-                          className="relative"
-                           onClick={stopPropagation}
-                           initial={{ scale: 0.8 }}
-                           animate={{ scale: 1 }}
-                           exit={{ scale: 0.8 }}
-                           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                       >
-                          <ProjectMediaDisplay
-                              // ... zoomed media props ...
-                              project={project}
-                              layoutId={layoutId}
-                              objectFitClass="object-contain"
-                              className="max-w-[95vw] max-h-[85vh] w-auto h-auto rounded-lg shadow-xl"
-                              controls
-                              autoPlay
-                              loop={Boolean(project.image?.endsWith?.('.mp4'))}
-                              inZoomView={true}
-                              // No need for onLoadSuccess here, layout is fixed
-                          />
-                          {/* Caption */}
-                           <motion.p
-                               // ... caption props ...
-                              className="text-center text-gray-300 mt-3 text-sm bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full inline-block absolute bottom-4 left-1/2 -translate-x-1/2"
-                               initial={{ opacity: 0, y: 10 }}
-                               animate={{ opacity: 1, y: 0 }}
-                               transition={{ delay: 0.1 }}
-                           >
-                              {project.title}
-                          </motion.p>
-                      </motion.div>
-                  </motion.div>
-              )}
-          </AnimatePresence>
-      </>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
+// --- Detail View Component ---
+const ProjectDetail = ({ project, onClose }) => {
+  useEffect(() => {
+    const handleEsc = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
 
-// --- Main Project Gallery Component (Enhanced styles) ---
-const ProjectGallery = () => {
-  const [selectedProject, setSelectedProject] = useState(null);
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 md:p-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        layoutId={`card-container-${project.id}`}
+        className="w-full max-w-5xl h-full max-h-[90vh] bg-white dark:bg-[#1c1c1e] rounded-[32px] overflow-hidden shadow-2xl relative flex flex-col md:flex-row"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 z-30 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors"
+        >
+          <X size={24} />
+        </button>
 
+        {/* Left: Media Hero */}
+        <div className="w-full md:w-1/2 h-[40vh] md:h-full relative overflow-hidden bg-black">
+          {project.mediaType === 'video' ? (
+            <motion.video
+              layoutId={`media-${project.id}`}
+              src={project.image}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <motion.img
+              layoutId={`media-${project.id}`}
+              src={project.image}
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent md:bg-gradient-to-r" />
+
+          <div className="absolute bottom-8 left-8 right-8 md:hidden">
+            <motion.h2 layoutId={`title-${project.id}`} className="text-4xl font-bold text-white mb-2">
+              {project.title}
+            </motion.h2>
+          </div>
+        </div>
+
+        {/* Right: Content */}
+        <div className="w-full md:w-1/2 h-full overflow-y-auto bg-white dark:bg-[#1c1c1e]">
+          <div className="p-8 md:p-12 space-y-8">
+            <div className="hidden md:block">
+              <p className="text-sm font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-2">
+                {project.subtitle}
+              </p>
+              <motion.h2 layoutId={`title-${project.id}`} className="text-5xl font-bold text-slate-900 dark:text-white mb-6">
+                {project.title}
+              </motion.h2>
+            </div>
+
+            <div className="prose prose-lg dark:prose-invert text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p>{project.longDescription}</p>
+            </div>
+
+            {/* Features List */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Key Features</h3>
+              <ul className="space-y-3">
+                {project.features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3 text-slate-600 dark:text-slate-300">
+                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Tech Stack */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Technologies</h3>
+              <div className="flex flex-wrap gap-2">
+                {project.tech.map((t) => (
+                  <span
+                    key={t}
+                    className="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-8 flex flex-wrap gap-4">
+              {project.links.live && (
+                <a
+                  href={project.links.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-transform active:scale-95"
+                >
+                  <ExternalLink size={18} />
+                  {project.links.live.includes('apple.com') ? 'App Store' : 'Open App'}
+                </a>
+              )}
+              {project.links.github && (
+                <a
+                  href={project.links.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white px-6 py-3 rounded-xl font-semibold transition-transform active:scale-95"
+                >
+                  <Github size={18} />
+                  Source Code
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// --- Main Gallery Component ---
+export default function ProjectGallery() {
+  const [selectedId, setSelectedId] = useState(null);
+  const containerRef = useRef(null);
+  const { scrollXProgress } = useScroll({ container: containerRef });
+
+  const selectedProject = projects.find(p => p.id === selectedId);
+
+  // Inject styles for hiding scrollbars
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      ::-webkit-scrollbar { width: 8px; height: 8px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background-color: rgba(150,150,150,0.35); border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background-color: rgba(150,150,150,0.55); }
-      body.dark ::-webkit-scrollbar-thumb { background-color: rgba(120,120,120,0.5); }
-      body.dark ::-webkit-scrollbar-thumb:hover { background-color: rgba(120,120,120,0.7); }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     `;
     document.head.appendChild(style);
     return () => {
@@ -556,33 +329,57 @@ const ProjectGallery = () => {
   }, []);
 
   return (
-    <div className="relative h-full min-h-full py-12 md:py-16 text-slate-900 dark:text-slate-100 selection:bg-sky-400 selection:text-white">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-200 dark:from-[#030712] dark:via-[#0f172a] dark:to-[#020617]" />
-      <div className="absolute inset-0 opacity-40 mix-blend-soft-light pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.18) 1px, transparent 0)', backgroundSize: '22px 22px' }} />
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-indigo-500/10" />
+    <div className="h-full w-full bg-slate-50 dark:bg-black overflow-hidden flex flex-col relative">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent dark:from-blue-900/20 pointer-events-none" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 space-y-12">
-        <ProjectHero projectCount={projects.length} />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              layout={index === 0 ? 'featured' : 'standard'}
-              onClick={setSelectedProject}
-            />
-          ))}
-        </div>
+      {/* Header */}
+      <div className="flex-shrink-0 px-8 pt-10 pb-4 z-10">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+          Projects
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">
+          A collection of experiments and products.
+        </p>
       </div>
 
+      {/* Horizontal Scroll Container */}
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-x-auto overflow-y-hidden flex items-center px-8 gap-8 pb-8 snap-x snap-mandatory no-scrollbar"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {projects.map((project, index) => (
+          <div key={project.id} className="snap-center py-10">
+            <TiltCard
+              project={project}
+              index={index}
+              onClick={(p) => setSelectedId(p.id)}
+            />
+          </div>
+        ))}
+
+        {/* Spacer for end of list */}
+        <div className="w-8 flex-shrink-0" />
+      </div>
+
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-200 dark:bg-slate-800">
+        <motion.div
+          className="h-full bg-blue-500"
+          style={{ scaleX: scrollXProgress, transformOrigin: '0%' }}
+        />
+      </div>
+
+      {/* Detail Overlay */}
       <AnimatePresence>
-        {selectedProject && (
-          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+        {selectedId && (
+          <ProjectDetail
+            project={selectedProject}
+            onClose={() => setSelectedId(null)}
+          />
         )}
       </AnimatePresence>
     </div>
   );
-};
-
-export default ProjectGallery;
+}
