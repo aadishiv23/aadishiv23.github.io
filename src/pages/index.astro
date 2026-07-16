@@ -1,10 +1,19 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-import MacDesktop from '../components/MacDesktop'; // Adjust path if necessary
+import PortfolioMac from '../components/PortfolioMac';
+import MinimalPortfolio from '../components/MinimalPortfolio';
 ---
 
-<Layout title="Aadi Shiv Malhotra - Portfolio OS">
-  {/* Render the main React component, ensuring client-side interactivity */}
-  <MacDesktop client:load />
+<Layout title="Aadi Shiv Malhotra — Portfolio" description="Aadi Shiv Malhotra is a software engineer at Apple building thoughtful native and intelligent experiences.">
+  <div class="desktop-version"><PortfolioMac client:media="(min-width: 701px)" /></div>
+  <div class="mobile-version"><MinimalPortfolio client:media="(max-width: 700px)" /></div>
 </Layout>
+
+<style>
+  .mobile-version { display: none; }
+  @media (max-width: 700px) {
+    .desktop-version { display: none; }
+    .mobile-version { display: block; }
+  }
+</style>
